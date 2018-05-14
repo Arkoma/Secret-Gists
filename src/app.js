@@ -1,3 +1,4 @@
+/* eslint-disable */
 require('dotenv').config();
 const bodyParser = require('body-parser');
 const express = require('express');
@@ -21,7 +22,7 @@ github.authenticate({
 
 // Set up the encryption - use process.env.SECRET_KEY if it exists
 // TODO:  Use the existing key or generate a new 32 byte key
-const key = process.env.SECRET_KEY;
+const key = process.env.SECRET_KEY || nacl.randomBytes(32);
 
 server.get('/', (req, res) => {
   // Return a response that documents the other routes/operations available
@@ -82,14 +83,24 @@ server.get('/gists', (req, res) => {
 server.get('/key', (req, res) => {
   // TODO Return the secret key used for encryption of secret gists
   res.send(key);
+  return key;
 });
 
 server.get('/secretgist/:id', (req, res) => {
   // TODO Retrieve and decrypt the secret gist corresponding to the given ID
+  const reqId = req.params.id;
+  github.gists.get({ reqId })
+    .then(reponse => {
+      res.json(response); v   
+    })
+    .catch(err => {
+      res.json(err);
+    })
 });
 
 server.get('/keyPairGen', (req, res) => {
-  let keypair;
+  let keypair = nacl.sign.keyPair();
+  console.log(keypair);
   // TODO Generate a keypair to use for sharing secret messagase using public gists
   // Display the keys as strings
   res.send(`
